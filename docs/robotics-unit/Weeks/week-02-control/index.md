@@ -1,97 +1,35 @@
 # Week 2 Robot control
 
-Last week we talked about **how to represent our robot**.
-
-This week we ask:
-
-> ok… now how do we actually make it move?
+Last week we talked about **how to represent our robot**. This week we ask, how do we actually make it move?
 
 More specifically:
 
-> how do we choose the control inputs \(u\) so that the robot does what we want?
+> how do we choose the control inputs $u$ that make the robot do what we want?
 
----
 
 ## Open loop control
 
-Let’s start with the simplest idea.
-
-We compute a sequence of controls ahead of time:
+Let’s start with the simplest idea. We compute a sequence of controls ahead of time:
 
 $$
 u_0, u_1, u_2, \dots
 $$
 
-and then just execute them.
+and then just execute them. No checking. No correction. Just vibes. This is *open loop control*. This might work if the world is perfectly predictable and nothing disturbs the system. Then we can plan once and execute.
 
-No checking. No correction. Just vibes.
+In fact, this is basically what a robot *planner* gives us, a trajectory and corresponding actions to follow.
 
-This is called **open loop control**.
-
----
-
-### Why might this work?
-
-If:
-- our model is perfect  
-- the world is perfectly predictable  
-- nothing disturbs the system  
-
-then we can plan once and execute.
-
-In fact, this is basically what a **planner** gives us: a trajectory and corresponding controls.
-
----
-
-### Why does this fail?
-
-Because the real world exists.
-
-- wheels slip  
-- sensors are noisy  
-- models are wrong  
-- humans do unpredictable things  
-
-So what actually happens is:
-
+**Why does this fail?** Because the real world exists. Wheels slip, sensors are noisy, models are wrong, humans do unpredictable things. So what actually happens is:
 > small errors → become big errors → robot ends up somewhere random
-
----
 
 ## Feedback control loops
 
-So instead of blindly executing commands, we do something smarter.
+So instead of blindly executing commands, we do something smarter. We measure what actually happened, and correct for it. This gives us a **feedback loop**:
 
-We measure what actually happened, and correct for it.
+Assume we have some desired state  or reference $x_d$ and the actual state $x$, we compute error, apply control $u$ and repeat until $x_d \rightarrow x$. If $x_d$ is a point, we call this *setpoint* control or regulation, if $x_d$ is a trajectory, we call this trajectory tracking.
 
-This gives us a **feedback loop**:
+![A feedback control loop. Given a goal and an measured output, a controller computes a control to send to a plant which produces an output, that we sense and compare to our goal again.](/img/week-02/feedbackcontrol.png)
 
-- desired state \(x_d\)
-- actual state \(x\)
-- compute error
-- apply control
-
-You can think of it as:
-
-> look → compare → correct → repeat
-
----
-
-### Control problem formulation
-
-At each time step:
-
-- we have a desired state \(x_d\)
-- we measure the current state \(x\)
-- we apply a control \(u\)
-
-The robot itself is often called the **plant**, and the controller is the thing choosing \(u\)
-
-So the job of control is:
-
-> choose \(u_k\) so that \(x_k \rightarrow x_d\)
-
----
 
 ## PD control
 
@@ -109,21 +47,14 @@ $$
 u(t) = K_p e(t) + K_d \frac{de(t)}{dt}
 $$
 
----
+The
+- **Proportional term**:  pushes toward the goal, bigger error → bigger correction. 
+- **Derivative term**:  damps motion by penalising the rate of change, prevents overshooting  
 
-### Intuition
+![PD control of robot position to a goal. PD results in a smooth response, while P only can oscillate or become unstable.](/img/week-02/stepresponse.png)
 
-- **Proportional term**:  
-  push toward the goal  
-  bigger error → bigger correction  
 
-- **Derivative term**:  
-  damp motion  
-  prevents overshooting  
-
-So PD is basically:
-
-> go toward the goal, but don’t be too aggressive
+So PD is basically go toward the goal, but don’t be too aggressive. We *tune* a controller by selecting the *gains* to get the best response for a given application.
 
 ---
 
@@ -131,14 +62,14 @@ So PD is basically:
 
 For a simple robot:
 
-- state: position \((x, y)\), orientation \(\theta\)
-- control: velocity \(v\), angular velocity \(\omega\)
+- state: position $(x, y)$, orientation $\theta$
+- control: velocity $v$, angular velocity $\omega$
 
 We can:
 
 1. compute the angle to the goal  
 2. compute the distance to the goal  
-3. apply proportional control:
+3. apply proportional control
 
 $$
 \omega_k = K_{p\theta} (\theta_g - \theta_k)
@@ -148,156 +79,60 @@ $$
 v_k = K_{p} \sqrt{(x_g - x_k)^2 + (y_g - y_k)^2}
 $$
 
-This is surprisingly effective :contentReference[oaicite:1]{index=1}.
-
----
-
-### Why we like PD
-
-- simple  
-- fast  
-- works surprisingly well  
-
----
-
-### Why we don’t stop here
-
-- no notion of optimality  
-- requires tuning gains  
-- struggles with complex systems  
-- does not explicitly handle constraints  
+This is a surprisingly effective approach. PD is simple, fast and works surprisingly well. But, it has no notion of optimality, requires tuning gain, struggles with complex systems where there is coupling between dimensions, and does not explicitly handle constraints (eg. follow this trajectory while maintaining a safe level of torque.).
 
 ---
 
 ## LQR (Linear Quadratic Regulator)
 
-Now we step up a level.
-
-Instead of saying:
-
-> push toward the goal
-
-we say:
-
-> choose controls that **minimise a cost function**
-
----
-
-### The setup
-
-We assume a linear system:
+Now we step up a level. Instead of saying push toward the goal, we say choose controls that **minimise a cost function**. We have already seen this formulation in the unit overview. Lets assume our robot is a linear system:
 
 $$
 x_{k+1} = A x_k + B u_k
 $$
 
-and define a cost:
-
+We define a cost:
 $$
 J = \sum_{k=0}^{\infty} \left[(x_k - x_g)^T Q (x_k - x_g) + u_k^T R u_k \right]
 $$
 
----
 
 ### What does this mean?
 
 We are penalising:
 
-- state error → \(Q\)  
-- control effort → \(R\)
+- state error → $Q$  
+- control effort → $R$
 
-So we are balancing:
+So we are balancing getting to the goal vs don’t use ridiculous control inputs. The easiest way to interpret this is to imagine $Q$ and $R$ are identity. Then we are basically penalising Euclidean distance to a desired state and the Euclidean norm of the control effort we use. This is a *convex* optimisation problem
 
-> get to the goal vs don’t use ridiculous control inputs
-
----
-
-### The result
-
-The optimal controller has the form:
-
+We can prove that the optimal controller for a system like this takes the form:
 $$
 u_k = -K(x_k - x_g)
 $$
 
-So it still *looks* like feedback.
+So it still looks like feedback. But now the gains $K$ come from solving an optimisation problem called the algebraic Ricatti equation. The main difference is that in PD control we picked gains and hoped for good behaviour, while LQR defines an objective and then derives optimal gains.  
 
-But now:
-
-> the gains \(K\) come from solving an optimisation problem :contentReference[oaicite:2]{index=2}
-
----
-
-### Big idea
-
-PD control:
-> pick gains → hope for good behaviour  
-
-LQR:
-> define objective → derive optimal gains  
-
----
 
 ## Iterative LQR (iLQR)
 
-LQR is great… but only works for **linear systems**.
-
-Robots are almost never linear.
-
-So what do we do?
-
-We cheat (in a principled way).
-
----
-
-### The idea
-
-For a nonlinear system:
-
+So LQR is great, but only works for **linear systems**. Robots are almost never linear, but maybe they are locally linear. For a nonlinear system:
 $$
 x_{k+1} = f(x_k, u_k)
 $$
 
-we:
-
 1. start with a guess for controls  
 2. simulate the trajectory  
 3. locally approximate the system as linear  
-4. solve LQR  
+4. solve an LQR  
 5. update controls  
 6. repeat  
 
-This is **iterative LQR (iLQR)** 
-
----
-
-### Intuition
-
-> repeatedly solve easier problems to approximate a hard one
-
----
-
-### Limitations
-
-- depends on initial guess  
-- can get stuck in local minima  
-- typically computed offline  
-
----
+This is **iterative LQR (iLQR)**. It has some limitations, it depends on your initial guess, can get stuck in local minima because the original problem is now potentially non-convex, and can be slow, so often computed offline. We may still need a PD control loop to handle disturbances.
 
 ## MPC (Model Predictive Control)
 
-Now we take one more step.
-
-Instead of solving once and committing, we:
-
-> solve → act → re-solve → act → repeat
-
----
-
-### The idea
-
-At each timestep:
+Now we take one more step. Instead of solving once and committing, we solve → act → re-solve → act → repeat. At each timestep we will
 
 1. plan over a short horizon  
 2. compute optimal controls  
@@ -305,64 +140,8 @@ At each timestep:
 4. shift horizon forward  
 5. repeat  
 
-This is **Model Predictive Control (MPC)** 
----
-
-### Why this is powerful
-
-- naturally handles disturbances  
-- adapts to new information  
-- can incorporate constraints  
-
----
-
-### Tradeoff
-
-- more computationally expensive  
-- requires solving optimisation repeatedly  
-
----
-
-## Big picture
-
-Let’s zoom out.
-
-All of these methods are trying to answer the same question:
-
-> how do we choose \(u\) so that the robot behaves the way we want?
-
-We can think of them as a spectrum:
-
-- **Open loop** → no feedback  
-- **PD control** → simple feedback  
-- **LQR** → optimal feedback (linear systems)  
-- **iLQR** → approximate optimal control (nonlinear systems)  
-- **MPC** → receding horizon, adaptive optimal control  
-
----
-
-## Final thought
-
-Control is where everything comes together:
-
-- state representation  
-- dynamics  
-- objectives  
-
-If Week 1 was:
-
-> what is the state?
-
-Week 2 is:
-
-> what should I do given that state?
-
----
+This is **Model Predictive Control (MPC)**. This is powerful because it naturally handles disturbances, adapts to new information and can incorporate constraints, but it's more computationally expensive, requires solving optimisation problems repeatedly. Most robot control systems are some form of MPC under the hood. 
 
 # Coming up next
 
-We have been assuming we *know* the dynamics.
-
-Next:
-
-> how do we model how robots move?
+We have been assuming we *know* the dynamics. Next we model how robots move.
