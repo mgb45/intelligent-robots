@@ -1,4 +1,4 @@
-# Week 6 Perception and learning
+# Week 6 Robot perception and learning
 
 ## Sensors
 
@@ -16,9 +16,11 @@
 
 ## Learning from demonstration
 
-### Motion primitives
+### Motion primitives and Dynamic movement primitives
 
 ### Behaviour cloning with neural networks
 
 Deep learning as perception layer -> deep learning as a control layer.
+
+### Vision language action models
 
