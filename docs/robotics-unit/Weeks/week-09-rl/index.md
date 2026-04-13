@@ -45,6 +45,8 @@ This is the **Bellman equation**. It says:
 
 > the value now = reward now + discounted value later
 
+> Bellman, R. (1957). *Dynamic Programming*. Princeton University Press.
+
 We can also define the **action-value function** $Q^\pi(s, a)$, which asks: what is the expected return if I am in state $s$, take action $a$, and then follow policy $\pi$ afterwards?
 
 $$
@@ -90,6 +92,8 @@ It measures how surprised we are. If $\delta_t > 0$, we got more reward than exp
 The key point is **bootstrapping**: we update an estimate using another estimate. We don't wait to see the full trajectory — we update after every single step.
 
 This is what makes TD learning fast and practical.
+
+> Sutton, R. S. (1988). "Learning to Predict by the Methods of Temporal Differences." *Machine Learning*, 3(1), 9–44.
 
 ## Value iteration
 
@@ -162,6 +166,8 @@ A common exploration strategy is **$\epsilon$-greedy**: with probability $\epsil
 
 Under mild conditions, Q-learning is guaranteed to converge to $Q^*$ for finite state and action spaces.
 
+> Watkins, C. J. C. H. and Dayan, P. (1992). "Q-learning." *Machine Learning*, 8(3–4), 279–292.
+
 The recovered optimal policy is simply:
 
 $$
@@ -181,6 +187,8 @@ Q(s,a) \approx Q(s,a;\theta)
 $$
 
 where $\theta$ are learnable parameters. This is **Deep Q-Networks (DQN)**, introduced by DeepMind in 2013.
+
+> Mnih, V., Kavukcuoglu, K., Silver, D., et al. (2015). "Human-level control through deep reinforcement learning." *Nature*, 518(7540), 529–533.
 
 The training objective is to minimise the **TD loss**:
 
@@ -203,6 +211,12 @@ For **continuous actions** we use **actor-critic** methods instead. These mainta
 The critic provides a learning signal for the actor. The actor tries to improve based on that signal. Together they can handle continuous action spaces like joint velocities or wheel speeds.
 
 This family of algorithms — **A3C**, **SAC**, **TD3** — forms the backbone of modern deep RL for robotics.
+
+> Mnih, V., Badia, A. P., Mirza, M., et al. (2016). "Asynchronous Methods for Deep Reinforcement Learning." In *Proceedings of ICML*, pp. 1928–1937.
+
+> Haarnoja, T., Zhou, A., Abbeel, P., and Levine, S. (2018). "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor." In *Proceedings of ICML*, pp. 1861–1870.
+
+> Fujimoto, S., van Hoof, H., and Meger, D. (2018). "Addressing Function Approximation Error in Actor-Critic Methods." In *Proceedings of ICML*, pp. 1587–1596.
 
 ## PPO
 
@@ -239,6 +253,8 @@ Why is PPO popular?
 
 PPO is used to train locomotion policies for legged robots, manipulation policies for robot arms, and was used to train the OpenAI Dota and robotics hand policies. If you want a default starting point for a robotics RL problem, PPO is a sensible choice.
 
+> Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and Klimov, O. (2017). "Proximal Policy Optimization Algorithms." arXiv preprint arXiv:1707.06347.
+
 ## The promise and the pain.
 
 So what is reinforcement learning actually good for?
@@ -266,6 +282,24 @@ None of this means RL is not useful. It means RL is a powerful but sharp tool. U
 > The gap between "it works in simulation" and "it works on the robot" is the central challenge of applying RL to real systems.
 
 The rest of the field is slowly closing that gap.
+
+---
+
+## Key Papers
+
+> Bellman, R. (1957). *Dynamic Programming*. Princeton University Press.
+
+> Sutton, R. S. (1988). "Learning to Predict by the Methods of Temporal Differences." *Machine Learning*, 3(1), 9–44.
+
+> Watkins, C. J. C. H. and Dayan, P. (1992). "Q-learning." *Machine Learning*, 8(3–4), 279–292.
+
+> Mnih, V., Kavukcuoglu, K., Silver, D., et al. (2015). "Human-level control through deep reinforcement learning." *Nature*, 518(7540), 529–533.
+
+> Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and Klimov, O. (2017). "Proximal Policy Optimization Algorithms." arXiv preprint arXiv:1707.06347.
+
+> Haarnoja, T., Zhou, A., Abbeel, P., and Levine, S. (2018). "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor." In *Proceedings of ICML*, pp. 1861–1870.
+
+> Sutton, R. S. and Barto, A. G. (2018). *Reinforcement Learning: An Introduction* (2nd ed.). MIT Press.
 
 ---
 

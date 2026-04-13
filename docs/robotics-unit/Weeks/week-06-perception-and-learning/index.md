@@ -108,6 +108,8 @@ For robust systems:
 - downweight bad measurements,
 - and always keep an eye on observability (“can I actually infer what I want from what I measure?”).
 
+> Fischler, M. A. and Bolles, R. C. (1981). "Random Sample Consensus: A Paradigm for Model Fitting with Applications to Image Analysis and Automated Cartography." *Communications of the ACM*, 24(6), 381–395.
+
 ### Information: what does the sensor *actually constrain*?
 
 A useful mental model: each sensor “observes” a subset of the state.
@@ -127,6 +129,8 @@ Good fusion is about combining complementary constraints.
 Vision is the most information-dense sensor we use, and also the most brittle.
 
 A pinhole camera (simplified) maps a 3D point to pixels:
+
+> Hartley, R. and Zisserman, A. (2004). *Multiple View Geometry in Computer Vision* (2nd ed.). Cambridge University Press.
 
 $$
 \tilde{u} \sim K \,[R\;|\;t] \, \tilde{P}
@@ -336,11 +340,15 @@ DMPs are popular because:
 - you can change goal $g$ and speed $\tau$,
 - and you get some robustness “for free”.
 
+> Ijspeert, A. J., Nakanishi, J., Hoffmann, H., Pastor, P., and Schaal, S. (2013). "Dynamical Movement Primitives: Learning Attractor Models for Motor Behaviors." *Neural Computation*, 25(2), 328–373.
+
 ---
 
 ### Behaviour cloning with neural networks (crash course)
 
 Behaviour cloning (BC) is supervised learning on demonstration data.
+
+> Pomerleau, D. A. (1989). "ALVINN: An Autonomous Land Vehicle in a Neural Network." In *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 1, pp. 305–313.
 
 You collect a dataset:
 $$
@@ -462,6 +470,8 @@ $$
 $$
 
 DAgger aligns the training distribution with the learned policy distribution.
+
+> Ross, S., Gordon, G., and Bagnell, D. (2011). "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning." In *Proceedings of AISTATS*, pp. 627–635.
 
 4) **Use a stabilizing controller + learned residual**
    Instead of learning full control:
@@ -797,6 +807,20 @@ But: it does not remove the need for
 4) Implement behaviour cloning loss for continuous actions and explain what it optimizes.
 5) Explain covariate shift and name at least two mitigations (DAgger, residual learning, noise injection).
 6) Make a plan to deploy a learned policy safely.
+
+---
+
+## Key Papers
+
+> Pomerleau, D. A. (1989). "ALVINN: An Autonomous Land Vehicle in a Neural Network." In *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 1, pp. 305–313.
+
+> Ijspeert, A. J., Nakanishi, J., Hoffmann, H., Pastor, P., and Schaal, S. (2013). "Dynamical Movement Primitives: Learning Attractor Models for Motor Behaviors." *Neural Computation*, 25(2), 328–373.
+
+> Ross, S., Gordon, G., and Bagnell, D. (2011). "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning." In *Proceedings of AISTATS*, pp. 627–635.
+
+> Fischler, M. A. and Bolles, R. C. (1981). "Random Sample Consensus: A Paradigm for Model Fitting with Applications to Image Analysis and Automated Cartography." *Communications of the ACM*, 24(6), 381–395.
+
+> Hartley, R. and Zisserman, A. (2004). *Multiple View Geometry in Computer Vision* (2nd ed.). Cambridge University Press.
 
 ---
 

@@ -200,6 +200,8 @@ $$
 
 The Kalman filter is optimal for linear systems with Gaussian noise. This provides a balance between trusting the model and trusting the measurements, depending on their respective uncertainties.
 
+> Kalman, R. E. (1960). "A New Approach to Linear Filtering and Prediction Problems." *Journal of Basic Engineering*, 82(1), 35–45.
+
 There is a catch though, the Kalman filter can't handle multi-modal beliefs like the corridor example above. A Gaussian distribution only has one mode or peak.
 
 ## Extended Kalman filters
@@ -280,6 +282,8 @@ $$
 
 The EKF works well when nonlinearities are mild, but it is only an approximation and can struggle when the system is highly nonlinear. Let's look at this for a wheeled mobile robot.
 
+> Julier, S. J. and Uhlmann, J. K. (1997). "A New Extension of the Kalman Filter to Nonlinear Systems." In *Proceedings of SPIE*, vol. 3068, pp. 182–193.
+
 ![An extended Kalman filter.](/img/week-04/ekf.png)
 
 ---
@@ -334,6 +338,8 @@ $$
 
 Particle filters are very flexible and can represent complex, multimodal beliefs. However, they can be computationally expensive, especially in high-dimensional state spaces. Another name for a particle filter is sequential Monte Carlo inference.
 
+> Gordon, N. J., Salmond, D. J., and Smith, A. F. M. (1993). "Novel approach to nonlinear/non-Gaussian Bayesian state estimation." *IEE Proceedings F – Radar and Signal Processing*, 140(2), 107–113.
+
 ![A particle filter.](/img/week-04/particle_filter.png)
 
 ## Summary
@@ -346,4 +352,16 @@ All of these filters implement the same recursive Bayes estimation framework. Th
 - Particle filters approximate the distribution using weighted samples.
 
 Each method trades off accuracy, flexibility, and computational cost, and the right choice depends on the characteristics of the system being modelled. The estimation approach and abstraction also affects what we can control or how we plan so is an important design choice in any robotic application.
+
+## Key Papers
+
+> Kalman, R. E. (1960). "A New Approach to Linear Filtering and Prediction Problems." *Journal of Basic Engineering*, 82(1), 35–45.
+
+> Julier, S. J. and Uhlmann, J. K. (1997). "A New Extension of the Kalman Filter to Nonlinear Systems." In *Proceedings of SPIE*, vol. 3068, pp. 182–193.
+
+> Gordon, N. J., Salmond, D. J., and Smith, A. F. M. (1993). "Novel approach to nonlinear/non-Gaussian Bayesian state estimation." *IEE Proceedings F*, 140(2), 107–113.
+
+> Fox, D., Burgard, W., and Thrun, S. (1999). "Markov localization for mobile robots in dynamic environments." *Journal of Artificial Intelligence Research*, 11, 391–427.
+
+> Thrun, S., Burgard, W., and Fox, D. (2005). *Probabilistic Robotics*. MIT Press.
 

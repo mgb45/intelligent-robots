@@ -116,6 +116,8 @@ We simplify the car to:
 - one front wheel (steering)
 - one rear wheel (driving)
 
+> Rajamani, R. (2011). *Vehicle Dynamics and Control* (2nd ed.). Springer.
+
 ### State and controls
 
 State:
@@ -173,6 +175,8 @@ A **differential drive robot** has:
 
 - two wheels  
 - independently controlled  
+
+> Siegwart, R., Nourbakhsh, I. R., and Scaramuzza, D. (2011). *Introduction to Autonomous Mobile Robots* (2nd ed.). MIT Press.
 
 ### Configuration
 
@@ -351,6 +355,14 @@ Same idea.
 Just a bigger $x$, and a more complicated $f$. All of robotics sits on top of modelling.
 
 Unfortunately, f your model is wrong, your controller will be wrong. And your robot will let you know.
+
+## Key Papers
+
+> Rajamani, R. (2011). *Vehicle Dynamics and Control* (2nd ed.). Springer.
+
+> Siegwart, R., Nourbakhsh, I. R., and Scaramuzza, D. (2011). *Introduction to Autonomous Mobile Robots* (2nd ed.). MIT Press.
+
+> Thrun, S., Burgard, W., and Fox, D. (2005). *Probabilistic Robotics*. MIT Press.
 
 # Coming up next
 

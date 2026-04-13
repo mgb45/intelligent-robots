@@ -129,7 +129,11 @@ When we observe a new landmark:
 - we add it to the state  
 - we update the covariance  
 
-This gives us a full SLAM system :contentReference[oaicite:0]{index=0}
+This gives us a full SLAM system
+
+> Smith, R., Self, M., and Cheeseman, P. (1986). "On the representation and estimation of spatial uncertainty." *International Journal of Robotics Research*, 5(4), 56–68.
+
+> Durrant-Whyte, H. and Bailey, T. (2006). "Simultaneous Localisation and Mapping (SLAM): Part I." *IEEE Robotics and Automation Magazine*, 13(2), 99–110.
 
 ---
 
@@ -210,6 +214,8 @@ This is called **Rao-Blackwellisation**.
 
 This leads to algorithms like **FastSLAM**.
 
+> Montemerlo, M., Thrun, S., Koller, D., and Wegbreit, B. (2002). "FastSLAM: A Factored Solution to the Simultaneous Localization and Mapping Problem." In *Proceedings of the AAAI National Conference on Artificial Intelligence*, pp. 593–598.
+
 ---
 
 ## Planning
@@ -258,7 +264,9 @@ If we hit something:
 - Bug 1: explore entire obstacle  
 - Bug 2: return to goal line  
 
-These are simple and surprisingly effective :contentReference[oaicite:1]{index=1}
+These are simple and surprisingly effective
+
+> Lumelsky, V. J. and Stepanov, A. A. (1987). "Path-planning strategies for a point mobile automaton moving amidst unknown obstacles of arbitrary shape." *Algorithmica*, 2(1–4), 403–430.
 
 ---
 
@@ -295,6 +303,8 @@ A* uses:
 
 to efficiently find paths.
 
+> Hart, P. E., Nilsson, N. J., and Raphael, B. (1968). "A Formal Basis for the Heuristic Determination of Minimum Cost Paths." *IEEE Transactions on Systems Science and Cybernetics*, 4(2), 100–107.
+
 ---
 
 ### D*
@@ -302,6 +312,8 @@ to efficiently find paths.
 D* is a dynamic version:
 
 > re-plans efficiently when the map changes
+
+> Stentz, A. (1994). "Optimal and Efficient Path Planning for Partially-Known Environments." In *Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)*, pp. 3310–3317.
 
 ---
 
@@ -317,7 +329,9 @@ Instead of a grid, we can represent space as a graph.
 - keep only collision-free ones  
 - connect nearby nodes  
 
-This builds a **roadmap** of free space :contentReference[oaicite:2]{index=2}
+This builds a **roadmap** of free space
+
+> Kavraki, L. E., Švestka, P., Latombe, J. C., and Overmars, M. H. (1996). "Probabilistic roadmaps for path planning in high-dimensional configuration spaces." *IEEE Transactions on Robotics and Automation*, 12(4), 566–580.
 
 ---
 
@@ -361,6 +375,8 @@ This rapidly explores space.
 
 > naturally explores large spaces efficiently
 
+> LaValle, S. M. (1998). "Rapidly-Exploring Random Trees: A New Tool for Path Planning." Technical Report TR 98-11, Iowa State University.
+
 ---
 
 ### When do we use it?
@@ -399,6 +415,20 @@ That is what makes it hard.
 And also what makes it interesting.
 
 ---
+
+## Key Papers
+
+> Smith, R., Self, M., and Cheeseman, P. (1986). "On the representation and estimation of spatial uncertainty." *International Journal of Robotics Research*, 5(4), 56–68.
+
+> Durrant-Whyte, H. and Bailey, T. (2006). "Simultaneous Localisation and Mapping (SLAM): Part I." *IEEE Robotics and Automation Magazine*, 13(2), 99–110.
+
+> Montemerlo, M., Thrun, S., Koller, D., and Wegbreit, B. (2002). "FastSLAM: A Factored Solution to the Simultaneous Localization and Mapping Problem." In *Proceedings of AAAI*, pp. 593–598.
+
+> Hart, P. E., Nilsson, N. J., and Raphael, B. (1968). "A Formal Basis for the Heuristic Determination of Minimum Cost Paths." *IEEE Transactions on Systems Science and Cybernetics*, 4(2), 100–107.
+
+> Kavraki, L. E., Švestka, P., Latombe, J. C., and Overmars, M. H. (1996). "Probabilistic roadmaps for path planning in high-dimensional configuration spaces." *IEEE Transactions on Robotics and Automation*, 12(4), 566–580.
+
+> LaValle, S. M. (1998). "Rapidly-Exploring Random Trees: A New Tool for Path Planning." Technical Report TR 98-11, Iowa State University.
 
 # Coming up next
 
