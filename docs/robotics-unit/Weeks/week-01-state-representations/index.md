@@ -235,6 +235,10 @@ A very common representation that addresses some of these concerns is an occupan
 
 So instead of “there is a wall here”, we say “there is a 0.8 probability of a wall here”. We can store these representations somewhat more efficiently using tree-like structures (eg. Octree, kd-trees). 
 
+> Elfes, A. (1989). "Using occupancy grids for mobile robot perception and navigation." *Computer*, 22(6), 46–57.
+
+> Hornung, A., Wurm, K. M., Bennewitz, M., Stachniss, C., and Burgard, W. (2013). "OctoMap: An efficient probabilistic 3D mapping framework based on octrees." *Autonomous Robots*, 34(3), 189–206.
+
 ![A 3D occupancy grid map.](/img/week-01/occupancygrid.png)
 
 This representations are very useful for collision avoidance or planning, but make contact rich tasks more challenging (eg. folding a t-shirt).
@@ -256,6 +260,8 @@ You can imagine breaking a space down into a *scene-graph* with
 - intersections
 - the location of objects or storage
 
+> Kuipers, B. (2000). "The Spatial Semantic Hierarchy." *Artificial Intelligence*, 119(1–2), 191–233.
+
 This is great for high-level planning, but sacrifices some of the information needed for low level control aspects. A common trade-off is to use both, a local map for *local planning*, and a topological map for *global planning*.
 
 A major limitation of these map representations is that they are generally static and unchanging. But intelligent robots take actions that change the environment. So we need ways of updating these representations or dynamics or *world models*, that model how the world changes in response to our robot actions. We will look at this in week 3.
@@ -265,6 +271,18 @@ A major limitation of these map representations is that they are generally stati
 ## Final thought
 
 There is no “best” representation, only **the right representation for the task**. This is a recurring theme in robotics. The representations above quickly become limited in terms of tasks. In more complex cases, it may be better to *learn* representations instead. We'll look at this in week 9.
+
+---
+
+## Key Papers
+
+> Elfes, A. (1989). "Using occupancy grids for mobile robot perception and navigation." *Computer*, 22(6), 46–57.
+
+> Hornung, A., Wurm, K. M., Bennewitz, M., Stachniss, C., and Burgard, W. (2013). "OctoMap: An efficient probabilistic 3D mapping framework based on octrees." *Autonomous Robots*, 34(3), 189–206.
+
+> Kuipers, B. (2000). "The Spatial Semantic Hierarchy." *Artificial Intelligence*, 119(1–2), 191–233.
+
+> Thrun, S., Burgard, W., and Fox, D. (2005). *Probabilistic Robotics*. MIT Press.
 
 ---
 

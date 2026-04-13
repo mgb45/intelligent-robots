@@ -111,7 +111,9 @@ $$
 u_k = -K(x_k - x_g)
 $$
 
-So it still looks like feedback. But now the gains $K$ come from solving an optimisation problem called the algebraic Ricatti equation. The main difference is that in PD control we picked gains and hoped for good behaviour, while LQR defines an objective and then derives optimal gains.  
+So it still looks like feedback. But now the gains $K$ come from solving an optimisation problem called the algebraic Ricatti equation. The main difference is that in PD control we picked gains and hoped for good behaviour, while LQR defines an objective and then derives optimal gains.
+
+> Kalman, R. E. (1960). "Contributions to the Theory of Optimal Control." *Boletin de la Sociedad Matematica Mexicana*, 5(2), 102–119.  
 
 
 ## Iterative LQR (iLQR)
@@ -130,6 +132,8 @@ $$
 
 This is **iterative LQR (iLQR)**. It has some limitations, it depends on your initial guess, can get stuck in local minima because the original problem is now potentially non-convex, and can be slow, so often computed offline. We may still need a PD control loop to handle disturbances.
 
+> Li, W. and Todorov, E. (2004). "Iterative Linear Quadratic Regulator Design for Nonlinear Biological Movement Systems." In *Proceedings of the 1st International Conference on Informatics in Control, Automation and Robotics (ICINCO)*, pp. 222–229.
+
 ## MPC (Model Predictive Control)
 
 Now we take one more step. Instead of solving once and committing, we solve → act → re-solve → act → repeat. At each timestep we will
@@ -140,7 +144,17 @@ Now we take one more step. Instead of solving once and committing, we solve → 
 4. shift horizon forward  
 5. repeat  
 
-This is **Model Predictive Control (MPC)**. This is powerful because it naturally handles disturbances, adapts to new information and can incorporate constraints, but it's more computationally expensive, requires solving optimisation problems repeatedly. Most robot control systems are some form of MPC under the hood. 
+This is **Model Predictive Control (MPC)**. This is powerful because it naturally handles disturbances, adapts to new information and can incorporate constraints, but it's more computationally expensive, requires solving optimisation problems repeatedly. Most robot control systems are some form of MPC under the hood.
+
+> Mayne, D. Q., Rawlings, J. B., Rao, C. V., and Scokaert, P. O. M. (2000). "Constrained model predictive control: Stability and optimality." *Automatica*, 36(6), 789–814. 
+
+## Key Papers
+
+> Kalman, R. E. (1960). "Contributions to the Theory of Optimal Control." *Boletin de la Sociedad Matematica Mexicana*, 5(2), 102–119.
+
+> Li, W. and Todorov, E. (2004). "Iterative Linear Quadratic Regulator Design for Nonlinear Biological Movement Systems." In *Proceedings of ICINCO*, pp. 222–229.
+
+> Mayne, D. Q., Rawlings, J. B., Rao, C. V., and Scokaert, P. O. M. (2000). "Constrained model predictive control: Stability and optimality." *Automatica*, 36(6), 789–814.
 
 # Coming up next
 
