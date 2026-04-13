@@ -4,13 +4,21 @@
 
 ## Vision
 
+## RGBD sensors
+
+## Tactile sensors
+
 ## Lidar
 
-## Positioning
+## Positioning sensors
 
-## Odometry
+## Odometric sensors
 
-## Learning
+## Learning from demonstration
+
+### Motion primitives
+
+### Behaviour cloning with neural networks
 
 Deep learning as perception layer -> deep learning as a control layer.
 

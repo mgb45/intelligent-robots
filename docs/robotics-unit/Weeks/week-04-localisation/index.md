@@ -15,13 +15,17 @@ But we may have other sources of informaton. What if for example we knew that ou
 
 Bayes rule is a law of probability (you can easily derive this using conditional probability laws) that gives us a principled way of combining prior information with likelihoods. We write
 
-$$ p(x_t|z_t) = \frac{p(z_t|x_t)p(x_t)}{p(z_t)} $$
+$$ 
+p(x_t|z_t) = \frac{p(z_t|x_t)p(x_t)}{p(z_t)} 
+$$
 
 Our *posterior* belief, the probability that I am in state $x_t$, given the observation $z_t$ is equal to the likelihood of seeing observation $z_t$ if I were in state $x_t$, multipled by the prior belief that I was in state $x_t$, normalised by the *marginal likelihood* of ever seeing the observation $z_t$.
 
 We call 
 
-$$ p(z_t) = \int p(z_t|x_t) p(x_t) d x_t $$
+$$ 
+p(z_t) = \int p(z_t|x_t) p(x_t) d x_t 
+$$
 
 a marginal likelihood because it marginalises out all the possible ways we could get an observation $z_t$, by averaging (takes an expectation) over all the states $x_t$ in proportion to the probabability of these occuring.
 
@@ -31,15 +35,23 @@ Bayes rule gave us a way of expressing our belief that our robot was in a state 
 
 Using Bayes rule, we can express this as
 
-$$p(x_t|z_{1:t}) = \frac{p(z_{1:t}|x_t) p(x_t)}{[p(z_{1:t})]} = \frac{p(z_{t}|x_t,z_{1:t-1}) p(z_{1:t-1}|x_t)|p(x_t)}{[p(z_t|z_{1:t-1})p(z_{1:t-1})]} \quad \text {factorising and conditioning the joint distribution}$$ 
+$$
+p(x_t|z_{1:t}) = \frac{p(z_{1:t}|x_t) p(x_t)}{[p(z_{1:t})]} = \frac{p(z_{t}|x_t,z_{1:t-1}) p(z_{1:t-1}|x_t)|p(x_t)}{[p(z_t|z_{1:t-1})p(z_{1:t-1})]} \quad \text {factorising and conditioning the joint distribution}
+$$ 
 
-$$ p(x_t|z_{1:t}) = \frac{p(z_{t}|x_t) p(x_t|z_{1:t-1})}{p(z_t|z_{1:t-1})} \quad \text{Simplifiying the likelihood and applying another Bayes rule}$$
+$$ 
+p(x_t|z_{1:t}) = \frac{p(z_{t}|x_t) p(x_t|z_{1:t-1})}{p(z_t|z_{1:t-1})} \quad \text{Simplifiying the likelihood and applying another Bayes rule}
+$$
 
 Which can in turn be broken down into two steps:
 
-$$ p(x_t|z_{1:t-1}) = \int p(x_t|x_{t-1}) p(x_{t-1}|z_{1:t-1}) d x_{t-1} \quad \text{Predict} $$
+$$ 
+p(x_t|z_{1:t-1}) = \int p(x_t|x_{t-1}) p(x_{t-1}|z_{1:t-1}) d x_{t-1} \quad \text{Predict} 
+$$
 
-$$ p(x_t|z_{1:t}) = \frac{p(z_{t}|x_t) p(x_t|z_{1:t-1})}{p(z_t|z_{1:t-1})} \quad \text{Update} $$
+$$ 
+p(x_t|z_{1:t}) = \frac{p(z_{t}|x_t) p(x_t|z_{1:t-1})}{p(z_t|z_{1:t-1})} \quad \text{Update} 
+$$
 
 The recursion above is very powerful, it provides a sequential way of updating our belief in a robot state as new information comes in. Looking at the equations above, we can see what we need to make this happen. We start with a prior belief in our robot state $p(x_0)$.
 
@@ -49,14 +61,289 @@ We then get a measurement or observation as multiply the likelihood of obtaining
 
 Let's make this more concrete with an example. My robot starts somewhere near the position (0,0). We use the dynamics to make a prediction about all the places it could possibily end up for a given movement command. We then make a measurement, and reweight this by the chances of getting that measurement for each of these places. We now use this as the new belief for our robot state, and repeat.
 
-This is a general rule that applies regardless of dynamics, sensors or representations. Lets look at some common representations.
+This is a general rule that applies regardless of dynamics, sensors or representations. Lets look at some common assumptions, representations and models.
 
-## Discrete Bayes filters
+## Discrete Bayes (Histogram) filters
+
+The recursive state estimation equations above are completely general, but in many cases they are hard to compute exactly. One simple way to make them tractable is to assume that the state can only take one of a finite number of values. Instead of representing our belief as a continuous probability density, we represent it as a set of probabilities over bins or cells. This is why these are often called *histogram filters*.
+
+Suppose our state $x_t$ can take values from a finite set $\{x^1, x^2, \dots, x^N\}$. Our belief is then just a categorical distribution:
+
+$$
+\mathrm{bel}_t(i) = p(x_t = x^i \mid z_{1:t})
+$$
+
+where $\mathrm{bel}_t(i)$ is the probability that the robot is in state $x^i$ at time $t$.
+
+The prediction step becomes a sum rather than an integral:
+
+$$
+\overline{\mathrm{bel}}_t(i) = p(x_t = x^i \mid z_{1:t-1})
+= \sum_{j=1}^N p(x_t = x^i \mid x_{t-1} = x^j)\,\mathrm{bel}_{t-1}(j)
+$$
+
+This says that the probability of being in bin $i$ at time $t$ is found by considering all the ways we could have arrived there from every bin $j$ at time $t-1$, weighted by how likely it was that we were in bin $j$.
+
+The update step is then
+
+$$
+\mathrm{bel}_t(i) = \eta \, p(z_t \mid x_t = x^i)\,\overline{\mathrm{bel}}_t(i)
+$$
+
+where $\eta$ is a normalising constant chosen so that the probabilities sum to one:
+
+$$
+\eta = \frac{1}{\sum_{i=1}^N p(z_t \mid x_t = x^i)\,\overline{\mathrm{bel}}_t(i)}
+$$
+
+So the full discrete Bayes filter is
+
+$$
+\overline{\mathrm{bel}}_t(i) = \sum_{j=1}^N p(x_t = x^i \mid x_{t-1} = x^j)\,\mathrm{bel}_{t-1}(j)
+$$
+
+$$
+\mathrm{bel}_t(i) = \eta \, p(z_t \mid x_t = x^i)\,\overline{\mathrm{bel}}_t(i)
+$$
+
+This is perhaps the most direct implementation of recursive state estimation. It works for arbitrary probability distributions and can represent multiple hypotheses very naturally. For example, if a robot in a corridor cannot distinguish between two similar-looking locations, the histogram filter can represent a belief with two distinct peaks.
+
+![A histogram filter.](/img/week-04/histogram_filters.png)
+
+This famous example is taken from the paper 
+
+> Fox, Dieter, Wolfram Burgard, and Sebastian Thrun. "Markov localization for mobile robots in dynamic environments." Journal of artificial intelligence research 11 (1999): 391-427.
+
+The downside is that the number of bins grows very quickly with state dimension, but you can probably already see how this can be used with the occupancy grid map representation we saw in Week 1. For a one or two-dimensional state this may be fine, but for higher-dimensional states it quickly becomes computationally expensive. 
+
+---
 
 ## Kalman filters
 
-### Extended Kalman filters
+A different approach is to assume that the uncertainty in our state can be represented by a Gaussian distribution. Instead of tracking the full probability distribution, we only track its mean and covariance. This gives a very compact representation, and under linear-Gaussian assumptions the recursion can be computed exactly.
+
+Suppose our dynamics are linear:
+
+$$
+x_t = A x_{t-1} + B u_t + \epsilon_t
+$$
+
+with process noise
+
+$$
+\epsilon_t \sim \mathcal{N}(0,Q)
+$$
+
+and our measurement model is also linear:
+
+$$
+z_t = C x_t + \delta_t
+$$
+
+with measurement noise
+
+$$
+\delta_t \sim \mathcal{N}(0,R)
+$$
+
+If our prior at time $t-1$ is Gaussian,
+
+$$
+p(x_{t-1}\mid z_{1:t-1}) = \mathcal{N}(x_{t-1}; \mu_{t-1}, \Sigma_{t-1})
+$$
+
+then the predicted state is also Gaussian:
+
+$$
+p(x_t \mid z_{1:t-1}) = \mathcal{N}(x_t; \overline{\mu}_t, \overline{\Sigma}_t)
+$$
+
+with
+
+$$
+\overline{\mu}_t = A\mu_{t-1} + B u_t
+$$
+
+$$
+\overline{\Sigma}_t = A \Sigma_{t-1} A^\top + Q
+$$
+
+These are the prediction equations. The mean is propagated through the dynamics, while the covariance grows due to both prior uncertainty and process noise.
+
+Once we receive a measurement $z_t$, we update our belief. The innovation (or residual) is:
+
+$$
+y_t = z_t - C \overline{\mu}_t
+$$
+
+The innovation covariance is:
+
+$$
+S_t = C \overline{\Sigma}_t C^\top + R
+$$
+
+The Kalman gain is:
+
+$$
+K_t = \overline{\Sigma}_t C^\top S_t^{-1}
+$$
+
+The posterior mean and covariance are then:
+
+$$
+\mu_t = \overline{\mu}_t + K_t y_t
+$$
+
+$$
+\Sigma_t = (I - K_t C)\overline{\Sigma}_t
+$$
+
+The Kalman filter is optimal for linear systems with Gaussian noise. This provides a balance between trusting the model and trusting the measurements, depending on their respective uncertainties.
+
+There is a catch though, the Kalman filter can't handle multi-modal beliefs like the corridor example above. A Gaussian distribution only has one mode or peak.
+
+## Extended Kalman filters
+
+Real robotic systems are rarely linear. The Extended Kalman Filter (EKF) adapts the Kalman filter to nonlinear systems by linearising the dynamics and measurement models around the current estimate.
+
+Suppose our system is:
+
+$$
+x_t = f(x_{t-1},u_t) + \epsilon_t, \qquad \epsilon_t \sim \mathcal{N}(0,Q)
+$$
+
+$$
+z_t = h(x_t) + \delta_t, \qquad \delta_t \sim \mathcal{N}(0,R)
+$$
+
+### Predict
+
+We propagate the mean through the nonlinear dynamics:
+
+$$
+\overline{\mu}_t = f(\mu_{t-1},u_t)
+$$
+
+We compute the Jacobian of the dynamics:
+
+$$
+F_t = \left.\frac{\partial f}{\partial x}\right|_{x=\mu_{t-1},u=u_t}
+$$
+
+and approximate the covariance:
+
+$$
+\overline{\Sigma}_t = F_t \Sigma_{t-1} F_t^\top + Q
+$$
+
+### Update
+
+We predict the measurement:
+
+$$
+\hat{z}_t = h(\overline{\mu}_t)
+$$
+
+Compute the Jacobian of the measurement model:
+
+$$
+H_t = \left.\frac{\partial h}{\partial x}\right|_{x=\overline{\mu}_t}
+$$
+
+Innovation:
+
+$$
+y_t = z_t - \hat{z}_t
+$$
+
+Innovation covariance:
+
+$$
+S_t = H_t \overline{\Sigma}_t H_t^\top + R
+$$
+
+Kalman gain:
+
+$$
+K_t = \overline{\Sigma}_t H_t^\top S_t^{-1}
+$$
+
+Posterior:
+
+$$
+\mu_t = \overline{\mu}_t + K_t y_t
+$$
+
+$$
+\Sigma_t = (I - K_t H_t)\overline{\Sigma}_t
+$$
+
+The EKF works well when nonlinearities are mild, but it is only an approximation and can struggle when the system is highly nonlinear. Let's look at this for a wheeled mobile robot.
+
+![An extended Kalman filter.](/img/week-04/ekf.png)
+
+---
 
 ## Particle filters
 
+A third approach is to represent the belief distribution using a set of $M$ weighted samples or *particles*. This allows us to approximate arbitrary probability distributions, including multimodal ones while addressing some of the downsides of discretising the whole state space into a histogram.
+
+We approximate the posterior as:
+
+$$
+p(x_t \mid z_{1:t}) \approx \sum_{i=1}^M w_t^{(i)} \,\delta(x_t - x_t^{(i)})
+$$
+
+where each particle $x_t^{(i)}$ is a hypothesis of the state, and $w_t^{(i)}$ is its weight.
+
+At time $t-1$, we have:
+
+$$
+\{x_{t-1}^{(i)}, w_{t-1}^{(i)}\}_{i=1}^M
+$$
+
+### Predict
+
+We sample each particle forward:
+
+$$
+x_t^{(i)} \sim p(x_t \mid x_{t-1}^{(i)}, u_t)
+$$
+
+### Update
+
+We update weights using the likelihood:
+
+$$
+\tilde{w}_t^{(i)} = w_{t-1}^{(i)} \, p(z_t \mid x_t^{(i)})
+$$
+
+### Normalise
+
+$$
+w_t^{(i)} = \frac{\tilde{w}_t^{(i)}}{\sum_{j=1}^M \tilde{w}_t^{(j)}}
+$$
+
+### Resample
+
+Resample particles according to $w_t^{(i)}$, then reset:
+
+$$
+w_t^{(i)} = \frac{1}{M}
+$$
+
+Particle filters are very flexible and can represent complex, multimodal beliefs. However, they can be computationally expensive, especially in high-dimensional state spaces. Another name for a particle filter is sequential Monte Carlo inference.
+
+![A particle filter.](/img/week-04/particle_filter.png)
+
+## Summary
+
+All of these filters implement the same recursive Bayes estimation framework. The key difference lies in how the belief distribution is represented.
+
+- Histogram filters use a discrete representation over bins.
+- Kalman filters assume linear-Gaussian systems and track mean and covariance.
+- Extended Kalman filters handle nonlinear systems via linearisation.
+- Particle filters approximate the distribution using weighted samples.
+
+Each method trades off accuracy, flexibility, and computational cost, and the right choice depends on the characteristics of the system being modelled. The estimation approach and abstraction also affects what we can control or how we plan so is an important design choice in any robotic application.
 

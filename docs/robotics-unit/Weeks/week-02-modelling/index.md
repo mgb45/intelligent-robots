@@ -297,35 +297,11 @@ $$
 x_{k+1} = f(x_k, u_k)
 $$
 
-and calling this a **robot model**.
-
-But this is really just a modelling choice.
-
-## It’s all just a model
-
-There is no real distinction between:
-
-- a robot model  
-- a world model  
-- a simulator  
-
-They are all just:
-
-> functions that describe how a system evolves over time
-
-## What changes is what we include
-
-So far, our state has been something like:
-
+and calling this a **robot model**, because our state has been something like
 $$
 x = (x, y, \theta)
 $$
-
-which only describes the robot.
-
-That means our model is implicitly assuming:
-
-> the world does not exist (or does not matter)
+which only describes the robot. That means our model is implicitly assuming the world does not exist (or does not matter).
 
 ## Expanding the state
 
@@ -341,69 +317,17 @@ $$
 x_{k+1} = f(x_k, u_k)
 $$
 
-But now:
-
-- the robot moves  
-- the world can change  
-- interactions can happen  
-
-Nothing new mathematically.
-
-We just changed what we decided to model.
+But now, the robot moves, the world can change and interactions can happen. There is nothing new mathematically, we just changed what we decided to model.
 
 ## A simulator is just a bigger model
 
-A simulator is simply:
-
-> a model with a richer state and more detailed dynamics
-
-It might include:
-
-- contact  
-- friction  
-- collisions  
-- sensors  
-- other agents  
-
-But fundamentally, it is still just:
+A simulator is simply a model with a richer state and more detailed dynamics. It might include contact, friction, collisions, sensors and other agents, but fundamentally, it is still just:
 
 $$
 x_{k+1} = f(x_k, u_k)
 $$
 
----
-
-## Why this perspective matters
-
-Because it keeps things consistent.
-
-Whether we are:
-
-- writing down equations on paper  
-- coding a simple kinematic model  
-- using a physics engine  
-
-we are always doing the same thing:
-
-> choosing a state, and defining how it evolves
-
-## The real design choice
-
-The hard question is not:
-
-> what is the “correct” model?
-
-The real question is:
-
-> what do we choose to include in the state?
-
-Include too little:
-- model is simple  
-- but wrong  
-
-Include too much:
-- model is complex  
-- but hard to use  
+because [everything is functions and functions describe the world](https://youtu.be/PAZTIAfaNr8).
 
 ## Final thought
 
