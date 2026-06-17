@@ -34,7 +34,7 @@ Typically when we think about lower level continuous commands (eg. positions and
 
 We may also talk about this as a decision making problem, in which case our controls or actions $a$ are decision variables. Sometimes, we may separate into two or more levels of abstraction (*a hierarchy*) and talk about *planning*: the set of high level actions we need to take to solve a task, and *control*: the low level actions we need to take to reach a *subgoal*, *setpoint* or *post condition*. We also need *perception* to figure out what is happening in the world, which relies on *sensors*. These sensors are often unreliable or *uncertain* so we may need to think in terms of *partial observability* or *probabalistic beliefs* when we are *inferring* the state of the world or our robot. We often describe robotics as the study of *decision making under uncertainty*, which as a general problem also covers everything else you could ever work on.
 
-This leads to robot control paradigms like *sense*, *plan*, *act* or what we refer to as a *perception, planning control* loop.
+This leads to robot control paradigms like *sense*, *plan*, *act* or what we refer to as a *perception, planning, control* loop.
 
 Regardless of how we formulate the problem, our goal as roboticists is to eventually come up with a *policy*, a set of rules or functions or code that decides what commands to send to our robot. We typically denote the policy as
 
@@ -70,15 +70,15 @@ We won't answer this question, but we will walk through a range of partial answe
 3. Robot control: We will look at specific controller designs and ways to find policies for a range of standard robots. 
 4. SLAM part 1 (Localisation): We will look at a common state estimation problem, where is our robot in the world?  
 5. SLAM part 2 (Planning and Navigation): We will continue to look at state estimation, what is the state of the world (or *map*) and how should we move through it. 
-6. Perception and learning: We will briefly look at cameras as a sensor, but also look at ways to *learn* policies from *demonstrations*.
-7. Articulated robots (kinematics): We will make our robots a bit more compicated and think about the state and representing robots with arms or multiple joints. 
-8. Articulated robots (dynamics): We will think about the dynamics of these more complicated robot systems.
+6. Articulated robots (kinematics): We will make our robots a bit more compicated and think about the state and representing robots with arms or multiple joints. 
+7. Articulated robots (dynamics): We will think about the dynamics of these more complicated robot systems.
+8. 6. Perception and learning: We will briefly look at cameras as a sensor, but also look at ways to *learn* policies from *demonstrations*.
 9. Reinforcement learning: We will think about more general ways of solving the optimal control problem, when we don't have a lot of information.
 
 We often think about robotics as both a science and system. We use science and theory to model or understand one component of the general problem, but our choices then lead to implications in other aspects of the system because everything is tightly coupled. Good roboticists manage to straddle the detail in each little subsystem, but also the big picture, how does everything work together?
 
-As part of this unit, we will run a rolling project. We have deliberately simplified the robot - just a wheeled platform with limited sensing. We will use this to work through all of the modelling and control choices above, as well as the practical difficulties of making an autnomous integrated sytem work in the real world. But, don't forget - these principles apply everywhere and to everything - we use the exact same approaches on our most complex humanoid robots in our research. 
+As part of this unit, we will run a rolling project. We have deliberately simplified the robot - just a wheeled platform with very limited sensing and unusual dynamics. We will use this to work through all of the modelling and control choices above, as well as the practical difficulties of making an autnomous integrated sytem work in the real world. But, don't forget - these principles apply everywhere and to everything - we use the exact same approaches on our most complex humanoid robots in our research. 
 
 ## Let's dive in
 
-[Week 1: Robot Pose →](./weeks/week-01-pose/)
+[Week 1: Robot States →](./Weeks/week-01-state-representations/)

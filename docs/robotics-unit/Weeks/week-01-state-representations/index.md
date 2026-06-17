@@ -1,4 +1,4 @@
-# Week 1: State Representations
+# Week 1: State representations
 
 Let’s start with the first big question:
 
@@ -290,4 +290,4 @@ There is no “best” representation, only **the right representation for the t
 
 Now that we can represent state…
 
-→ How do we actually **control** a robot?
+→ How do we actually **model** a robot's motion?
