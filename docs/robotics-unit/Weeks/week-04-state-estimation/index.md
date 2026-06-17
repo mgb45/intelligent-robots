@@ -5,11 +5,11 @@
 So far, we have spoken about how to represent our robot and our world and model the dynamics of how things change when we interact with it, but we haven't discussed how we obtain this information. In practice we can never know the *ground truth* state of our robot and the world, and always measure or sense it subject to some error. There may also be completely un-modelled aspects on stochastic effects in the world, which also introduce uncertainty. We need methods to cope with this uncertainty - and the best language to think about uncertainty is probability. 
 
 
-Typically, we are taught to reason about probabilities in terms of frequencies - if I roll a dice 10 times, what are the chances I roll a 6? This *frequentist* perspective doesn't really match the robotics problem we face, so instead we tend to think about probability as a belief, given what I have sensed in the world, I believe my state is x with some probability. 
+Typically, we are taught to reason about probabilities in terms of frequencies - if I roll a dice 10 times, what are the chances I roll a 6? This *frequentist* perspective doesn't really match the robotics problem we face, so instead we tend to think about probability as a belief: given what I have sensed in the world, I believe my state is x with some probability. 
 
 In robotics, we can rarely trust our sensors. Instead, we may think about the *likelihood* of making some observation $z_t$, $p(z_t|x_t)$ in a given state. As an example, think about a temperature sensor that measures temperature with zero-mean gaussian noise of standard deviation 5 degrees. If the true temperature were 25 degrees, and our sensor measured 25.05 degrees, the likelihood of making this observation would be $\mathcal{N}(z_t|x_t,\sigma) = \mathcal{N}(25.05|25,5)$, quite probable. Here $\mathcal{N}$ is shortand for a Gaussian distribution over $z_t$ with mean $x_t$ and standard deviation $\sigma$. However, if the true temperature were 0 degrees, it is much less likely our temperature sensor would return a measurement of 25.05 degrees. 
 
-But we may have other sources of informaton. What if for example we knew that our temperature sensor is located in Antartica? When we incorporate this $prior$, that 0 degree temperature starts to seem a lot more probable.
+But we may have other sources of information. What if for example we knew that our temperature sensor is located in Antartica? When we incorporate this $prior$, that 0 degree temperature starts to seem a lot more probable.
 
 ## Bayes Rule
 
@@ -31,12 +31,12 @@ a marginal likelihood because it marginalises out all the possible ways we could
 
 ## Recursive state estimation
 
-Bayes rule gave us a way of expressing our belief that our robot was in a state given a single observation, but in practice we are interested in the conditional probability distibution: $p(x_t|z_{1:t})$ - given observations or measurements $z$ taken at times steps $1$ to $t$, what is the probability that my robot (or world) is in the state $x_t$. We refer to this as a state estimation or tracking problem.
+Bayes rule gave us a way of expressing our belief that our robot was in a state given a single observation, but in practice we are interested in the conditional probability distibution: $p(x_t|z_{1:t})$ - given all observations or measurements $z$ taken at times steps $1$ to $t$, what is the probability that my robot (or world) is in the state $x_t$. We refer to this as a state estimation or tracking problem.
 
 Using Bayes rule, we can express this as
 
 $$
-p(x_t|z_{1:t}) = \frac{p(z_{1:t}|x_t) p(x_t)}{[p(z_{1:t})]} = \frac{p(z_{t}|x_t,z_{1:t-1}) p(z_{1:t-1}|x_t)|p(x_t)}{[p(z_t|z_{1:t-1})p(z_{1:t-1})]} \quad \text {factorising and conditioning the joint distribution}
+p(x_t|z_{1:t}) = \frac{p(z_{1:t}|x_t) p(x_t)}{p(z_{1:t})} = \frac{p(z_{t}|x_t,z_{1:t-1}) p(z_{1:t-1}|x_t)|p(x_t)}{p(z_t|z_{1:t-1})p(z_{1:t-1})} \quad \text {factorising and conditioning the joint distribution}
 $$ 
 
 $$ 
@@ -55,13 +55,13 @@ $$
 
 The recursion above is very powerful, it provides a sequential way of updating our belief in a robot state as new information comes in. Looking at the equations above, we can see what we need to make this happen. We start with a prior belief in our robot state $p(x_0)$.
 
-Last week, when we introduced robot models we saw that these could be expressed as $x_t = f(x_{t-1},u_{t},\epsilon)$, with $\epsilon$  our uncertainty or disturbances affecting our model. Another way to describe this is that our dynamics are a probabalistic transtion $p(x_t|x_{t-1},u_{t-1})$, given a state and action at time $t-1$, what is the probability that my robot is in the state $x_t$. For simplicity, we will drop the $u$ for now. The equations above use this to make a prediction about where our robot could be after taking some action.
+We then use a dynamics model to predict where our robot may be. Last week, when we introduced robot models we saw that these could be expressed as $x_t = f(x_{t-1},u_{t},\epsilon)$, with $\epsilon$  our uncertainty or disturbances affecting our model. Another way to describe this is that our dynamics are a probabalistic transtion $p(x_t|x_{t-1},u_{t-1})$, given a state and action at time $t-1$, what is the probability that my robot is in the state $x_t$. For simplicity, we will drop the $u$ for now. The equations above use this to make a prediction about where our robot could be after taking some action.
 
 We then get a measurement or observation as multiply the likelihood of obtaining this in a given state by the predicted probability of being in that state to get a posterior belief. This becomes the prior for the next recursion. As we repeat this, we accumulate information and refine our beliefs over time.
 
 Let's make this more concrete with an example. My robot starts somewhere near the position (0,0). We use the dynamics to make a prediction about all the places it could possibily end up for a given movement command. We then make a measurement, and reweight this by the chances of getting that measurement for each of these places. We now use this as the new belief for our robot state, and repeat.
 
-This is a general rule that applies regardless of dynamics, sensors or representations. Lets look at some common assumptions, representations and models.
+This is a general rule that applies regardless of dynamics, sensors or representations - neuroscientists often talk about Bayesian brains. Lets look at some common assumptions, representations and models.
 
 ## Discrete Bayes (Histogram) filters
 
@@ -353,13 +353,11 @@ All of these filters implement the same recursive Bayes estimation framework. Th
 
 Each method trades off accuracy, flexibility, and computational cost, and the right choice depends on the characteristics of the system being modelled. The estimation approach and abstraction also affects what we can control or how we plan so is an important design choice in any robotic application.
 
-## Sensor fusion cheat sheet (what fuses well, what fails, what to watch)
+## Sensor fusion 
 
-Sensor fusion is not a separate problem from state estimation, it is the same recursive Bayes estimation framework with multiple sensor streams. We still make a prediction using the motion model and then perform correction using measurements; we simply repeat or combine updates from different sensors under the same posterior belief.
+Sensor fusion is the general problem of combining information from multiple sensors to support robot state estimation. Importantly, this is not a separate problem from state estimation, it is the same recursive Bayes estimation framework with multiple sensor streams. We still make a prediction using the motion model and then perform correction using measurements; we simply repeat or combine updates from different sensors under the same posterior belief.
 
 In other words, we are still estimating distributions like $p(x_t \mid z_{1:t})$, but now $z_t$ may include measurements from wheel odometry, IMU, camera, lidar, GNSS and other sources with different rates and noise characteristics.
-
-### The fusion goal
 
 You want an estimate of some state (often pose + velocity):
 
@@ -374,71 +372,6 @@ Nearly all practical fusion fits the pattern:
 - **prediction** using a motion model (often IMU integration)
 - **correction** using measurements (camera/lidar/GPS/wheels)
 
-### Typical sensor roles
-
-**IMU**
-- Pros: high rate, observes fast motion
-- Cons: drifts (bias integration)
-- Use it for: short-term motion propagation (prediction)
-
-**Wheel odometry**
-- Pros: simple, good on flat ground with grip
-- Cons: slip, scale errors
-- Use it for: relative planar motion correction (especially indoors)
-
-**Camera (VO/VIO)**
-- Pros: rich information, good in textured environments
-- Cons: lighting, blur, scale ambiguity (monocular), dynamic scenes
-- Use it for: pose correction, map building, object pose
-
-**Lidar**
-- Pros: metric geometry, robust to lighting
-- Cons: glass/black surfaces, motion distortion, lower rate
-- Use it for: scan matching, mapping, stable pose correction
-
-**GPS/GNSS**
-- Pros: global reference outdoors
-- Cons: multipath, outages, low rate
-- Use it for: global position correction / drift reset outdoors
-
-### Three failure modes to diagnose first (in order)
-
-#### 1) Time synchronization bugs
-
-Symptoms:
-- "laggy" correction
-- oscillations / weird overshoot
-- consistent errors that change with speed
-
-Fix:
-- use sensor timestamps, not message receipt time
-- verify camera trigger / IMU clock alignment
-- log and plot time offsets
-
-#### 2) Bad extrinsics (wrong transform between sensor and base)
-
-Symptoms:
-- pose estimate looks fine until you turn, then explodes
-- map "smears" during rotation
-- lidar/camera alignment looks off
-
-Fix:
-- re-check $T_{\text{base}\rightarrow \text{sensor}}$
-- confirm frame conventions (right-hand vs left-hand, axis directions)
-- validate by rotating in place and watching residuals
-
-#### 3) Mis-modelled noise / unhandled outliers
-
-Symptoms:
-- estimator "snaps" to wrong features
-- drift resets erratically
-- performance depends heavily on environment
-
-Fix:
-- add gating / robust loss
-- increase measurement covariance when conditions degrade
-- detect and drop outliers (RANSAC, Huber)
-
 ### Practical tuning heuristics
 
 - If you trust a sensor *too much*, it will dominate and break you when it fails.
@@ -448,10 +381,10 @@ When in doubt:
 - start conservative (higher measurement noise),
 - then gradually tighten.
 
-### What to plot when debugging fusion
+### What to plot when debugging estimation
 
 Plot over time:
-- innovation / residual norms (measurement minus prediction)
+- uncertainty/ innovation / residual norms (measurement minus prediction)
 - estimated biases ($b_t$)
 - velocity and yaw rate consistency
 - pose drift vs ground truth (if available)
