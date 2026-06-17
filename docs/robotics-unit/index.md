@@ -79,6 +79,19 @@ We often think about robotics as both a science and system. We use science and t
 
 As part of this unit, we will run a rolling project. We have deliberately simplified the robot - just a wheeled platform with very limited sensing and unusual dynamics. We will use this to work through all of the modelling and control choices above, as well as the practical difficulties of making an autnomous integrated sytem work in the real world. But, don't forget - these principles apply everywhere and to everything - we use the exact same approaches on our most complex humanoid robots in our research. 
 
+## How to cite
+
+If you find these notes useful, please cite them as:
+
+```bibtex
+@book{robots,
+  title        = "Intelligent Robotics",
+  howpublished = "Course Notes for Intelligent Robotics",
+  author       = "Burke, Michael",
+  year         = 2026,
+}
+```
+
 ## Let's dive in
 
 [Week 1: Robot States →](./Weeks/week-01-state-representations/)

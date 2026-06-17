@@ -1,10 +1,6 @@
 # Week 2 Modelling mobile robots
 
-Last week we talked about state representations, but this week we ask a slightly more fundamental question:
-
-> how does our robot move?
-
-This is the general **modelling problem**.
+So far we have thought about the best representation of our robot, and this week we move to modelling how this evolves over time, or in response to commands or actions we send the robot. To help we need to start with thinking about how robots can move, which is often more constrained than the representation we selected to describe their state.
 
 ## Configuration and task space
 
@@ -21,7 +17,7 @@ $$
 
 So this robot has **3 degrees of freedom**.
 
-### A slightly strange example: a train
+#### A slightly strange example: a train
 
 A train moves in 3D space.
 
@@ -44,16 +40,16 @@ For the train:
 - task space = 2D or 3D world  
 - configuration space = 1D curve  
 
-So the robot is moving on a **manifold** inside the task space.
+It helps to think that the robot is moving on a *manifold* inside the task space.
 
 ### Fully actuated vs underactuated
 
-Another important idea:
+Another important idea is understanding what we can control on our robot.
 
 - **Fully actuated**: we can directly control all degrees of freedom  
-- **Underactuated**: we cannot  
+- **Underactuated**: we cannot control all degrees of freedom directly, only a subset. 
 
-Example:
+For example:
 
 A hovercraft has:
 - configuration: $(x, y, \theta)$ → 3 DOF  
@@ -77,7 +73,7 @@ $$
 
 This is just a more concrete version of what we wrote in Week 1.
 
-### What goes into a motion model?
+#### What goes into a motion model?
 
 - state $x$: often position, orientation, velocity  
 - control $u$: motor commands, steering angle, etc  
@@ -89,7 +85,7 @@ $$
 x_{k+1} = f(x_k, u_k, \epsilon_k)
 $$ 
 
-## Bicycle models
+### Bicycle models
 
 A very common model for cars is the **bicycle model**. We simplify the car to:
 
@@ -127,9 +123,11 @@ $$
 
 Intuitively, velocity moves you forward in the direction you are facing, steering changes your heading and curved motion comes from combining both.  
 
-## Differential drive robots
+### Differential drive robots
 
-Now let’s look at a robot closer to what you will actually use. A **differential drive robot** has two wheels that are independently controlled. 
+Now let’s look at common wheeled robot model, also suitable for robots with smaller wheel bases and tighter turn radii.
+
+A *differential drive robot* has two wheels that are independently controlled.  
 
 > Siegwart, R., Nourbakhsh, I. R., and Scaramuzza, D. (2011). *Introduction to Autonomous Mobile Robots* (2nd ed.). MIT Press.
 
@@ -144,8 +142,6 @@ so
 $$
 u = (v, \omega)
 $$
-
-### Motion model
 
 If the robot moves forward and rotates we can describe it's motion as
 
@@ -255,7 +251,7 @@ $$
 
 This gives us a locally linear model of the rigid-body dynamics. We will see next week that this is a useful form for a particular class of common control problems, the *linear quadratic regulator*.
 
-## A differential drive robot in a ball?
+### A differential drive robot in a ball?
 
 Now let’s ask a slightly weird question.
 
@@ -271,8 +267,280 @@ But:
 - the motion model \(f(x, u)\) changes  
 
 Fundamentally, robot modelling is about abstraction. We choose what state to represent, what controls to use and what physics to include. Different choices lead to different models and different behaviour. Some models are easier to control, or help us because they align closely with information we can sense.
+## Observation models
 
-## Simulators as models
+So far, we have described models as:
+
+$$
+x_{k+1} = f(x_k, u_k)
+$$
+
+But modelling does not stop at motion. A complete model also has to account for **what the robot can observe about the world**.
+
+Robots do not get state directly. They get **sensors**.
+
+And sensors don't give truth — they give **measurements**, at a certain rate, with noise, delays, bias, distortions, missing data, and occasional lies.
+
+A practitioner's view of a sensor is not "it returns numbers", but:
+
+- **What physical quantity is being measured?**
+- **What is the measurement model?**
+- **What are the dominant failure modes?**
+- **What is the timing model (rate, latency, synchronization)?**
+- **How do I calibrate it (intrinsics/extrinsics, bias, scale)?**
+- **How do I fuse it with other sensors?**
+
+
+A very common abstraction is:
+
+$$
+z_t = h(x_t) + v_t
+$$
+
+- $x_t$ = latent "true" state (pose, velocity, map, object pose, etc.)
+- $z_t$ = measurement at time $t$
+- $h(\cdot)$ = measurement function (often nonlinear)
+- $v_t$ = measurement noise (often approximated as Gaussian)
+
+In practice, a more realistic view is:
+
+$$
+z_t = h(x_{t-t_l}) + b + v_t
+$$
+
+- $t_l$ = latency / time offset (sensors rarely align perfectly with the control loop)
+- $b$ = bias / drift (IMUs, wheel odometry, magnetometers…)
+- $v_t$ = stochastic noise
+
+A big chunk of "robotics that works" is:
+- estimating $x_t$,
+- estimating $b$,
+- and managing timing (time sync).
+
+## Practical considerations around sensors
+
+### Sampling, latency, and synchronization 
+
+(why your robot looks haunted)
+
+Sensors are discrete-time. Control is discrete-time. But they run at different rates.
+
+- camera: e.g. 30 Hz (33 ms)
+- lidar: e.g. 10 Hz (100 ms)
+- IMU: e.g. 200-2100 Hz (1.0825 ms)
+- wheel encoders: e.g. 50-200 Hz
+
+If your sensor timestamps are wrong by 20-250 ms, that can be catastrophic at speed.
+
+Practical checklist:
+- Do I have **hardware timestamps** or am I using "message arrival time"?
+- Are my sensors **time-synchronized** (PTP, NTP, shared clock, trigger line)?
+- When I fuse, do I **propagate** states to measurement time?
+
+### Calibration: intrinsics vs extrinsics
+
+Two calibration types show up everywhere:
+
+1) **Intrinsics**: parameters *inside* the sensor model  
+   Example (camera): focal length, principal point, distortion coefficients.
+
+2) **Extrinsics**: rigid transform between frames  
+   Example: $T_{\text{base}\rightarrow \text{camera}}$.
+
+This ties directly back to Week 1: homogeneous transforms and frame chaining.
+
+If a sensor lives in frame $S$ and your robot base is frame $B$, you will write:
+
+$$
+p^S = T_{SB}\, p^B
+$$
+
+and you will spend a non-trivial portion of your life estimating $T_{SB}$.
+
+### Noise, bias, drift 
+
+(and why "Gaussian" is a convenient lie)
+
+Common patterns:
+
+- **white measurement noise**: $v_t \sim \mathcal{N}(0, R)$  
+- **bias**: constant or slowly varying offset  
+- **random walk drift**: $b_{t+1} = b_t + w_t$, $w_t \sim \mathcal{N}(0, Q)$  
+- **outliers**: non-Gaussian, heavy-tailed errors (bad features, sun glare, wheel slip)
+
+For robust systems:
+- detect outliers (gating, RANSAC, Huber loss),
+- downweight bad measurements,
+- and always keep an eye on observability ("can I actually infer what I want from what I measure?").
+
+> Fischler, M. A. and Bolles, R. C. (1981). "Random Sample Consensus: A Paradigm for Model Fitting with Applications to Image Analysis and Automated Cartography." *Communications of the ACM*, 24(6), 381–395.
+
+#### Information: what does the sensor *actually constrain*?
+
+A useful mental model: each sensor "observes" a subset of the state.
+
+- wheel odometry: constrains *relative motion* on the ground (until slip)
+- IMU: constrains angular velocity / acceleration (but drifts)
+- GPS: constrains global position (but noisy / blocked indoors)
+- camera: constrains geometry via features (but needs texture / light)
+- lidar: constrains geometry via depth returns (but fails on glass/black surfaces)
+
+Good fusion is about combining complementary constraints.
+
+## Useful Sensors
+
+### Vision
+
+Vision is the most information-dense sensor we use, and also the most brittle.
+
+A pinhole camera (simplified) maps a 3D point to pixels:
+
+> Hartley, R. and Zisserman, A. (2004). *Multiple View Geometry in Computer Vision* (2nd ed.). Cambridge University Press.
+
+$$
+\tilde{u} \sim K \,[R\;|\;t] \, \tilde{P}
+$$
+
+- $\tilde{P} = [X, Y, Z, 1]^T$ homogeneous 3D point in some world frame
+- $[R|t]$ camera pose (extrinsics)
+- $K$ intrinsics matrix
+- $\tilde{u} = [u, v, 1]^T$ pixel
+
+**1) Feature-based geometry (classical CV)**  
+- detect features (corners, blobs),
+- match across frames,
+- estimate motion / structure (PnP, essential matrix, bundle adjustment).
+
+Used heavily in:
+- visual odometry,
+- visual-inertial odometry (VIO),
+- SLAM.
+
+**2) Dense perception (learning-heavy)**  
+- semantic segmentation (pixels → class),
+- depth estimation,
+- object detection and tracking,
+- pose estimation (6-DoF object pose).
+
+Used heavily in:
+- manipulation,
+- human-robot interaction,
+- scene understanding.
+
+#### Failure modes you need to anticipate
+
+- motion blur (fast motion + low shutter speed)
+- rolling shutter artifacts
+- low texture / repetitive texture
+- lighting changes, glare, saturation
+- dynamic scenes (people, moving objects)
+
+Vision works best when you respect the physics (exposure, optics) *and* your algorithm assumptions.
+
+---
+
+### RGBD sensors
+
+RGBD sensors give you:
+- RGB image + depth map (or a point cloud).
+
+But depth is not "free truth". Common depth modalities:
+- structured light,
+- time-of-flight,
+- active stereo.
+
+Practical concerns:
+- depth noise increases with distance,
+- failures on shiny / transparent / dark surfaces,
+- missing depth (holes) near edges,
+- indoor sunlight issues (for some active sensors).
+
+From depth + intrinsics you can back-project pixels to 3D:
+
+Given pixel $(u,v)$ with depth $d$:
+
+$$
+X = (u - c_x)\frac{d}{f_x}, \quad Y = (v - c_y)\frac{d}{f_y}, \quad Z = d
+$$
+
+Now you can do:
+- plane fitting,
+- grasp point selection,
+- ICP registration,
+- voxel maps.
+
+---
+
+### Tactile sensors
+
+Touch is underrated because it's hard to instrument and interpret, but it's often the only reliable signal in contact-rich tasks.
+
+Common forms:
+- binary contact switches
+- force/torque sensors (wrist F/T)
+- pressure arrays ("tactile skins")
+- joint torque sensing (via motor current + model)
+
+A minimal model in manipulation:
+- measure contact wrench $w = [f_x,f_y,f_z,\tau_x,\tau_y,\tau_z]^T$
+- detect contact, slip, estimate friction / compliance
+
+Practical uses:
+- detect first contact and stop motion safely
+- regulate force (impedance / admittance control)
+- learn contact-rich skills (insertion, wiping, opening doors)
+
+---
+
+### Lidar
+
+Lidar is geometry at scale: ranges + angles → point clouds.
+
+A 2D lidar gives points in a plane; a 3D lidar gives a 3D point cloud.
+
+Measurement model (simplified):
+$$
+z = r + v,\quad v \sim \mathcal{N}(0,\sigma^2(r))
+$$
+
+Practical issues:
+- returns depend on surface reflectivity and angle
+- "no return" is informative (range maxed out)
+- spinning lidars are not instantaneous: the cloud is built over time (motion distortion)
+- glass can be weird; rain/snow can be weird
+
+---
+
+### Positioning sensors
+
+#### GPS / GNSS
+
+GNSS gives global position outdoors, but:
+- errors are correlated and environment-dependent,
+- multipath near buildings is nasty,
+- indoors it's mostly dead.
+
+If you have RTK GNSS you can get cm-level accuracy in good conditions, but it becomes a system integration problem (base station, corrections, antenna placement).
+
+#### Magnetometers
+
+Magnetometers can give heading *sometimes*, but indoor distortions are common. Treat them carefully (calibrate hard/soft iron, detect anomalies).
+
+---
+
+### Odometric sensors
+
+Wheel odometry is the "default" for mobile robots, but it is not ground truth.
+
+Failure modes:
+- wheel slip (sand, carpet, wet floors)
+- incorrect wheel radius / wheelbase calibration
+- encoder quantization / missed ticks
+- contact loss (one wheel lifted)
+
+This is why we fuse wheel odometry with IMU, lidar, or vision.
+
+## World models (simulators)
 
 So far, we have been writing down motion models like:
 
@@ -285,8 +553,6 @@ $$
 x = (x, y, \theta)
 $$
 which only describes the robot. That means our model is implicitly assuming the world does not exist (or does not matter).
-
-### Expanding the state
 
 If we instead define a bigger state:
 
@@ -302,7 +568,7 @@ $$
 
 But now, the robot moves, the world can change and interactions can happen. There is nothing new mathematically, we just changed what we decided to model.
 
-### A simulator is just a bigger model
+A simulator is just a bigger model
 
 A simulator is simply a model with a richer state and more detailed dynamics. It might include contact, friction, collisions, sensors and other agents, but fundamentally, it is still just:
 
@@ -312,7 +578,7 @@ $$
 
 because [everything is functions and functions describe the world](https://youtu.be/PAZTIAfaNr8).
 
-## Final thought
+Final thought
 
 So far, we have used very simple models.
 
@@ -333,7 +599,7 @@ Same idea.
 
 Just a bigger $x$, and a more complicated $f$. All of robotics sits on top of modelling.
 
-Unfortunately, f your model is wrong, your controller will be wrong. And your robot will let you know.
+Unfortunately, if your model is wrong, your controller will be wrong. And your robot will let you know.
 
 ## Key Papers
 
@@ -343,12 +609,12 @@ Unfortunately, f your model is wrong, your controller will be wrong. And your ro
 
 > Thrun, S., Burgard, W., and Fox, D. (2005). *Probabilistic Robotics*. MIT Press.
 
+> Fischler, M. A. and Bolles, R. C. (1981). "Random Sample Consensus: A Paradigm for Model Fitting with Applications to Image Analysis and Automated Cartography." *Communications of the ACM*, 24(6), 381–395.
+
+> Hartley, R. and Zisserman, A. (2004). *Multiple View Geometry in Computer Vision* (2nd ed.). Cambridge University Press.
+
 # Coming up next
 
-So far we have assumed we know where the robot is.
+Next we look at how to control our robot state, subject to these dynamics.
 
-Next:
-
-> how do we estimate $x$ in the real world?
-
-→ localisation and SLAM
+→ [Week 3: Control](../week-03-control/)
