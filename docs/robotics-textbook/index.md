@@ -84,7 +84,7 @@ If you find these notes useful, please cite them as:
 
 ```bibtex
 @book{robots,
-  title        = "Intelligent Robotics",
+  title        = "Physical AI: Robotics, Learning, and Control in the Real World",
   howpublished = "Online textbook draft",
   author       = "Burke, Michael",
   year         = 2026,
