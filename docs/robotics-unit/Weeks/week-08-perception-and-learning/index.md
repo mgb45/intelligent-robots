@@ -64,11 +64,11 @@ Learning is useful when an important mapping is hard to write down by hand but e
 
 A few examples make this concrete.
 
-A camera image contains information about objects, but writing an analytic equation from pixels to object identity is almost impossible. Instead, we collect labelled images and learn a perception model.
+A camera image contains information about objects, but writing an analytic equation from pixels to object identity is almost impossible. Instead, we collect labelled images and learn a perception model. Modern convolutional and transformer-based perception systems are examples of this idea, but for this week the important point is the input-output formulation rather than the architecture details.
 
 A robot arm has known rigid-body dynamics, but the exact friction, payload, cable forces or contact effects may be unknown. Instead of deriving every missing effect from first principles, we can learn a residual (additive) dynamics model from measured motion data.
 
-A human demonstrator may know how to perform a task, such as inserting a plug or folding cloth, even if we cannot easily write down the cost function or controller. Instead of hand-designing the policy, we can learn from demonstrations.
+A human demonstrator may know how to perform a task, such as inserting a plug or folding cloth, even if we cannot easily write down the cost function or controller. Instead of hand-designing the policy, we can learn from demonstrations. This is the basic idea behind imitation learning and behaviour cloning.
 
 This gives three important learning problems in robotics:
 
@@ -202,7 +202,11 @@ $$
 
 Again, the learned perception system converts raw observations into state-like quantities that connect back to planning and control.
 
+> Morrison, D., Corke, P., and Leitner, J. (2020). "Learning robust, real-time, reactive robotic grasping." *The International Journal of Robotics Research*, 39(2-3), 183-201.
+
 This is a useful way to think about deep learning in robotics. A neural network is often a complicated measurement function. It turns messy observations into estimates that the rest of the robot can use.
+
+
 
 ## Dynamics learning
 
@@ -256,7 +260,8 @@ Here $f_{\text{known}}$ might be a kinematic model, a rigid-body simulator or a 
 
 This is a very important pattern in robot learning. It says: use physics for the part we understand, and use data for the part we do not.
 
-Residual models can compensate for friction, delays, soft contacts, backlash, unmodelled payloads or systematic simulator errors. They are usually more data-efficient than learning the full dynamics from scratch because the learned model only needs to explain the error.
+Residual models can compensate for friction, delays, soft contacts, backlash, unmodelled payloads or systematic simulator errors. They are usually more data-efficient than learning the full dynamics from scratch because the learned model only needs to explain the error. This is the same modelling philosophy used in residual learning from demonstration, where a structured controller or motion primitive provides the baseline behaviour and a learned residual adapts it to contact-rich tasks.
+
 
 ### Probabilistic dynamics models
 
@@ -356,7 +361,9 @@ $$
 \min_\theta \sum_{(o,a^E)\in \mathcal{D}} -\log \pi_\theta(a^E \mid o).
 $$
 
-Behaviour cloning is attractive because it is simple. It reduces robot learning to supervised learning.
+Behaviour cloning is attractive because it is simple. It reduces robot learning to supervised learning. Early autonomous-driving work such as ALVINN is a classic example of this idea: learn a steering policy directly from driving examples.
+
+> Pomerleau, D. A. (1989). "ALVINN: An Autonomous Land Vehicle in a Neural Network." In *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 1, pp. 305-313.
 
 However, there is an important difference between ordinary supervised learning and robot control. In ordinary supervised learning, a prediction error usually does not affect the next input. In robotics, it does. If the policy makes a small mistake, the robot moves to a slightly different state. Then it observes a situation that may not have appeared in the demonstration data. This can lead to more errors, which lead to even less familiar states.
 
@@ -395,6 +402,8 @@ $$
 $$
 
 DAgger makes the training distribution closer to the deployment distribution. This is often much more important than choosing a more complicated neural network.
+
+> Ross, S., Gordon, G., and Bagnell, D. (2011). "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning." In *Proceedings of AISTATS*, pp. 627-635.
 
 ## Choosing the action representation
 
@@ -486,7 +495,9 @@ where $o_t$ might include images, proprioception, force readings and a goal, and
 
 A simple neural policy predicts one action. This is easy to train, but it can fail when there are multiple good actions for the same observation. For example, there may be several valid grasps for the same object. A deterministic policy trained with squared error may average these actions and produce a grasp that is not actually valid.
 
-One solution is a **mixture density network**. Instead of predicting one Gaussian action distribution, the model predicts a mixture:
+One solution is a **mixture density network**. This combines a neural network with a mixture model so that the output can represent a full conditional probability distribution, rather than just a single mean prediction. Instead of predicting one Gaussian action distribution, the model predicts a mixture:
+
+> Bishop, C. M. (1994). "Mixture Density Networks." Technical Report NCRG/94/004, Aston University.
 
 $$
 \pi_\theta(a \mid o) = \sum_{k=1}^{K} w_k(o)\,\mathcal{N}(a; \mu_k(o), \Sigma_k(o)).
@@ -495,6 +506,8 @@ $$
 Each component can represent a different mode of behaviour. In a grasping task, one component might represent grasping from the left, another from the right and another from above. The model does not have to average these possibilities into a single action.
 
 A more recent alternative is a **diffusion policy**. A diffusion policy represents the action distribution by learning how to gradually denoise an initially random action or action sequence. Rather than outputting one action in a single forward pass, it starts with noise and iteratively refines it into an action that looks like one from the demonstration data.
+
+> Chi, C., Xu, Z., Feng, S., Cousineau, E., Du, Y., Burchfiel, B., Tedrake, R., and Song, S. (2023). "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion." In *Robotics: Science and Systems (RSS)*.
 
 Conceptually:
 
@@ -512,7 +525,9 @@ Neural networks are flexible, but flexibility is not always what we need. Many r
 
 A **motion primitive** is a reusable movement pattern. Instead of learning a policy that maps every observation directly to every action, we learn or select parameters of a movement primitive. The primitive then generates the detailed trajectory.
 
-A classic example is the **Dynamic Movement Primitive** (DMP). A DMP represents a motion as a stable dynamical system plus a learned forcing term:
+A classic example is the **Dynamic Movement Primitive** (DMP). A DMP represents a motion as a stable dynamical system plus a learned forcing term.
+
+> Ijspeert, A. J., Nakanishi, J., Hoffmann, H., Pastor, P., and Schaal, S. (2013). "Dynamical Movement Primitives: Learning Attractor Models for Motor Behaviors." *Neural Computation*, 25(2), 328-373.
 
 $$
 \tau \dot{v} = \alpha_z(\beta_z(g-y)-v) + f(s),
@@ -528,6 +543,8 @@ DMPs are useful when we have demonstrations of a skill and want to reproduce it 
 
 A **probabilistic movement primitive** extends this idea by representing a distribution over trajectories rather than a single trajectory. This is useful when demonstrations vary, or when the robot needs to reason about uncertainty in the motion. Instead of saying "this is the trajectory", a probabilistic primitive says "these are the likely trajectories".
 
+> Paraschos, A., Daniel, C., Peters, J., and Neumann, G. (2013). "Probabilistic Movement Primitives." In *Advances in Neural Information Processing Systems (NeurIPS)*.
+
 Motion primitives are less general than large neural policies, but they are often easier to interpret, easier to constrain and more data-efficient. They are a good choice when the task is a structured motion rather than open-ended decision making.
 
 ### Sequence models, Decision Transformers and vision-language-action models
@@ -542,7 +559,11 @@ $$
 
 A **transformer** is a neural network architecture designed for sequence modelling. It uses attention to decide which parts of the previous sequence are relevant for predicting the next output. In robotics, this lets a policy condition on histories of observations, actions, goals and sometimes rewards.
 
-A **Decision Transformer** treats control as a sequence modelling problem. Instead of learning a value function or explicitly solving an optimal control problem, it predicts the next action conditioned on previous states, previous actions and a desired return. In simplified form:
+A **Decision Transformer** treats control as a sequence modelling problem. Instead of learning a value function or explicitly solving an optimal control problem, it predicts the next action conditioned on previous states, previous actions and a desired return.
+
+> Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P., Srinivas, A., and Mordatch, I. (2021). "Decision Transformer: Reinforcement Learning via Sequence Modeling." In *Advances in Neural Information Processing Systems (NeurIPS)*.
+
+In simplified form:
 
 $$
 a_t = \pi_\theta(a_t \mid s_{1:t}, a_{1:t-1}, R_{1:t}),
@@ -550,7 +571,9 @@ $$
 
 where $R$ represents a desired or remaining return. This is most naturally an offline learning method: it learns from a dataset of trajectories and then generates actions that resemble high-return behaviour.
 
-A **vision-language-action model** goes one step further by conditioning actions on visual observations and language instructions:
+A **vision-language-action model** goes one step further by conditioning actions on visual observations and language instructions. RT-2 is a representative example that connects vision-language pretraining with robot action prediction.
+
+> Brohan, A., Brown, N., Carbajal, J., Chebotar, Y., Chen, X., Choromanski, K., Ding, T., et al. (2023). "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control." In *Proceedings of the Conference on Robot Learning (CoRL)*.
 
 $$
 a_t = \pi_\theta(a_t \mid \text{images}, \text{language instruction}, \text{robot state}).
@@ -613,7 +636,7 @@ This can be handled by explicitly estimating state, or by using a temporal model
 
 ### Inductive biases
 
-An **inductive bias** is an assumption that helps a learning system generalise beyond its training data.
+An **inductive bias** is an assumption that helps a learning system generalise beyond its training data. The term is broad: it includes assumptions built into the model class, the representation, the controller, the data collection process and the loss function.
 
 This definition is important. Learning from finite data is impossible without some bias. If many functions fit the data equally well, the learner needs a reason to prefer one over another. Linear regression has an inductive bias toward linear functions. A convolutional neural network has an inductive bias toward local spatial patterns. A Kalman filter has an inductive bias toward a particular probabilistic state-space model.
 
@@ -716,21 +739,62 @@ $$
 
 The core idea is simple: collect input-output examples, choose a model class, define a loss, fit the parameters and evaluate the result. The robotics difficulty is that learned models operate inside feedback loops, under uncertainty, with safety constraints and limited data.
 
-## Key papers and references
+## Key papers 
 
-> Pomerleau, D. A. (1989). "ALVINN: An Autonomous Land Vehicle in a Neural Network." In *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 1, pp. 305-313.
+### Perception learning
 
-> Ross, S., Gordon, G., and Bagnell, D. (2011). "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning." In *Proceedings of AISTATS*, pp. 627-635.
+> He, K., Gkioxari, G., Dollár, P., and Girshick, R. (2017). "Mask R-CNN." In *IEEE International Conference on Computer Vision (ICCV)*.  
+> A standard instance-segmentation model. Relevant to the idea that learned perception can turn images into object masks for manipulation or scene understanding.
 
-> Ijspeert, A. J., Nakanishi, J., Hoffmann, H., Pastor, P., and Schaal, S. (2013). "Dynamical Movement Primitives: Learning Attractor Models for Motor Behaviors." *Neural Computation*, 25(2), 328-373.
+> Qi, C. R., Su, H., Mo, K., and Guibas, L. J. (2017). "PointNet: Deep learning on point sets for 3D classification and segmentation." In *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*.  
+> A canonical model for unordered 3-D point clouds, relevant for lidar and depth-camera perception.
 
-> He, K., Gkioxari, G., Dollar, P., and Girshick, R. (2017). "Mask R-CNN." In *IEEE International Conference on Computer Vision (ICCV)*.
+> Morrison, D., Corke, P., and Leitner, J. (2020). "Learning robust, real-time, reactive robotic grasping." *The International Journal of Robotics Research*, 39(2-3), 183-201.  
+> A robotics example of learned perception-to-action for grasping, using RGB-D observations to produce grasp commands.
 
-> Qi, C. R., Su, H., Mo, K., and Guibas, L. J. (2017). "PointNet: Deep learning on point sets for 3D classification and segmentation." In *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*.
+### Imitation learning and dataset shift
 
-> Morrison, D., Corke, P., and Leitner, J. (2020). "Learning robust, real-time, reactive robotic grasping." *The International Journal of Robotics Research*, 39(2-3), 183-201.
+> Pomerleau, D. A. (1989). "ALVINN: An Autonomous Land Vehicle in a Neural Network." In *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 1, pp. 305-313.  
+> A classic early example of behaviour cloning for driving: learn a policy from demonstrated steering behaviour.
 
-> Sutton, R. S. and Barto, A. G. (2018). *Reinforcement Learning: An Introduction* (2nd ed.). MIT Press.
+> Ross, S., Gordon, G., and Bagnell, D. (2011). "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning." In *Proceedings of AISTATS*, pp. 627-635.  
+> Introduces DAgger, a practical method for reducing the distribution-shift problem in behaviour cloning.
+
+### Dynamics learning and model-based learning
+
+> Deisenroth, M. P. and Rasmussen, C. E. (2011). "PILCO: A model-based and data-efficient approach to policy search." In *Proceedings of ICML*, pp. 465-472.  
+> A key example of data-efficient model-based robot learning using probabilistic dynamics models.
+
+> Chua, K., Calandra, R., McAllister, R., and Levine, S. (2018). "Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models." In *Advances in Neural Information Processing Systems (NeurIPS)*.  
+> A modern example of model-based learning using probabilistic neural dynamics models and planning.
+
+### Motion primitives, residual learning and inductive bias
+
+> Ijspeert, A. J., Nakanishi, J., Hoffmann, H., Pastor, P., and Schaal, S. (2013). "Dynamical Movement Primitives: Learning Attractor Models for Motor Behaviors." *Neural Computation*, 25(2), 328-373.  
+> The main reference for DMPs: structured, stable movement generators that can be fitted from demonstration.
+
+> Paraschos, A., Daniel, C., Peters, J., and Neumann, G. (2013). "Probabilistic Movement Primitives." In *Advances in Neural Information Processing Systems (NeurIPS)*.  
+> Extends movement primitives to distributions over trajectories, connecting demonstrations, uncertainty and motion generation.
+
+> Davchev, T., Luck, K. S., Burke, M., Meier, F., Schaal, S., and Ramamoorthy, S. (2022). "Residual Learning from Demonstration: Adapting DMPs for Contact-rich Manipulation." *IEEE Robotics and Automation Letters*, 7(2), 4488-4495. arXiv:2008.07682.  
+> An example of the principle used throughout these notes: keep a structured movement primitive, then learn a residual correction for contact-rich manipulation.
+
+> Battaglia, P. W., Hamrick, J. B., Bapst, V., Sanchez-Gonzalez, A., Zambaldi, V., Malinowski, M., Tacchetti, A., et al. (2018). "Relational inductive biases, deep learning, and graph networks." arXiv:1806.01261.  
+> A useful general reference for the idea that learning systems need structure or bias to generalise.
+
+### Probabilistic and sequence policy models
+
+> Bishop, C. M. (1994). "Mixture Density Networks." Technical Report NCRG/94/004, Aston University.  
+> Introduces mixture density networks, which are useful when the output distribution is multi-modal.
+
+> Chi, C., Xu, Z., Feng, S., Cousineau, E., Du, Y., Burchfiel, B., Tedrake, R., and Song, S. (2023). "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion." In *Robotics: Science and Systems (RSS)*.  
+> A modern imitation-learning method that represents robot actions as samples from a conditional denoising diffusion model.
+
+> Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P., Srinivas, A., and Mordatch, I. (2021). "Decision Transformer: Reinforcement Learning via Sequence Modeling." In *Advances in Neural Information Processing Systems (NeurIPS)*.  
+> Treats control as sequence modelling by conditioning action prediction on past states, actions and desired return.
+
+> Brohan, A., Brown, N., Carbajal, J., Chebotar, Y., Chen, X., Choromanski, K., Ding, T., et al. (2023). "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control." In *Proceedings of the Conference on Robot Learning (CoRL)*.  
+> A representative vision-language-action model showing how visual and language pretraining can be connected to robot action prediction.
 
 ## Coming up next
 
