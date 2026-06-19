@@ -428,4 +428,4 @@ because [everything is functions and functions describe the world](https://youtu
 
 Next, we look at how to control our robot state subject to these dynamics.
 
-→ [Week 3: Control](../week-03-control/)
+→ [Week 3: Control](../week-03-control/index.md)

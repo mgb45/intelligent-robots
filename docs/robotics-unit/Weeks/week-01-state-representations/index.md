@@ -290,4 +290,4 @@ There is no “best” representation, only **the right representation for the t
 
 Now that we can represent state…
 
-→ [Week 2: Modelling](../week-02-modelling/)
+→ [Week 2: Modelling](../week-02-modelling/index.md)

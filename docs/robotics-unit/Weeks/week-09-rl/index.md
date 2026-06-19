@@ -376,4 +376,4 @@ We have now covered the major pillars of robot intelligence: representation, mod
 
 Next, we ask how all of these ideas change when a human is in the loop.
 
-→ [Week 10: Human Robot Interaction](../week-10-hri/)
+→ [Week 10: Human Robot Interaction](../week-10-hri/index.md)

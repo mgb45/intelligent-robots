@@ -412,4 +412,4 @@ Plot over time:
 
 We can now estimate where our robot is. Next, we use this to navigate.
 
-→ [Week 5: Navigation](../week-05-navigation/)
+→ [Week 5: Navigation](../week-05-navigation/index.md)

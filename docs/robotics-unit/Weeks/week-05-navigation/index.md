@@ -630,4 +630,4 @@ Robotics is not just choosing actions. It is choosing actions **under uncertaint
 
 We now have models, estimators and planners, both global and local. Next, we look at perception and learning: how robots sense and interpret the world around them.
 
-→ [Week 6: Perception and Learning](../week-08-perception-and-learning/)
+→ [Week 6: Perception and Learning](../week-08-perception-and-learning/index.md)

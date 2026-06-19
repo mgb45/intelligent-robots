@@ -234,4 +234,4 @@ We have now covered two broad ways to make robots behave: write down a model of 
 
 Next, we look at perception and learning: how robots sense, interpret and learn from the world around them.
 
-→ [Week 8: Perception and learning](../week-08-perception-and-learning/)
+→ [Week 8: Perception and learning](../week-08-perception-and-learning/index.md)

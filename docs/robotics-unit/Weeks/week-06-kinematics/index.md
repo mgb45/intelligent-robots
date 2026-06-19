@@ -4,7 +4,7 @@ Last week we looked at navigation: how a robot estimates where it is, builds a m
 
 So far, most of our examples have been ground vehicles: robots whose main job is to move around in the world. Manipulators are different. A robot arm reaching for a cup, a gripper closing around an object, or a humanoid waving hello is not primarily described by its position on the floor. Instead, we describe it by the configuration of its links and joints.
 
-To do this properly, we need to return to the fundamentals from [Week 1](../week-01-state-representations/) and [Week 2](../week-02-modelling/) and think more carefully about what state and configuration really mean.
+To do this properly, we need to return to the fundamentals from [Week 1](../week-01-state-representations/index.md) and [Week 2](../week-02-modelling/index.md) and think more carefully about what state and configuration really mean.
 
 ## Articulated chains
 
@@ -165,7 +165,7 @@ A major practical issue occurs at **singular configurations**. At a singularity,
 
 It is worth pausing to connect this back to the earlier parts of the unit.
 
-In [Week 2](../week-02-modelling/), we introduced configuration space as an abstract idea. For a mobile robot, the configuration was often $(x,y,\theta)$, and we used that space to reason about what the robot could and could not do. For an articulated arm, the configuration space is the space of all joint values $\mathbf{q}$.
+In [Week 2](../week-02-modelling/index.md), we introduced configuration space as an abstract idea. For a mobile robot, the configuration was often $(x,y,\theta)$, and we used that space to reason about what the robot could and could not do. For an articulated arm, the configuration space is the space of all joint values $\mathbf{q}$.
 
 The forward kinematics maps configuration space into task space. The workspace is the image of that map: all the end-effector poses the robot can reach.
 
@@ -197,4 +197,4 @@ But reaching the target is not just a geometric problem. A real robot has mass, 
 
 We know the geometry. Now we need the physics. Next, we look at dynamics: how forces, torques, mass and inertia determine how robots actually move.
 
-→ [Week 7: Dynamics](../week-07-dynamics/)
+→ [Week 7: Dynamics](../week-07-dynamics/index.md)

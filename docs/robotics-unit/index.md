@@ -96,4 +96,4 @@ If you find these notes useful, please cite them as:
 
 ## Let's dive in
 
-[Week 1: Robot States →](./Weeks/week-01-state-representations/)
+[Week 1: Robot States →](./Weeks/week-01-state-representations/index.md)

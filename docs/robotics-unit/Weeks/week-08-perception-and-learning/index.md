@@ -802,4 +802,4 @@ This week introduced learning as an extension of modelling, estimation and contr
 
 Next week we look at what happens when the robot does not have demonstrations and instead learns by interacting with the world through rewards.
 
-→ [Week 9: Reinforcement Learning](../week-09-rl/)
+→ [Week 9: Reinforcement Learning](../week-09-rl/index.md)

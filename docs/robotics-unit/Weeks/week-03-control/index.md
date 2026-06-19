@@ -363,4 +363,4 @@ These methods are not mutually exclusive. A robot might use a planner to generat
 
 So far, we have assumed that we can measure the state of the robot accurately enough to use it for feedback. Next, we look at what happens when we cannot directly observe the state and must estimate it from noisy, delayed, and incomplete sensor measurements.
 
-→ [Week 4: State Estimation](../week-04-state-estimation/)
+→ [Week 4: State Estimation](../week-04-state-estimation/index.md)
